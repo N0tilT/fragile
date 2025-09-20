@@ -4,10 +4,10 @@ WORKDIR /app
 
 RUN npm install -g npm@8.12.1
 
-COPY ./fragileClient/package*.json ./
-RUN npm install
+COPY ./package*.json ./
+RUN npm install --legacy-peer-deps
 
-COPY ./fragileCLient .
+COPY . .
 
 EXPOSE 8137
 

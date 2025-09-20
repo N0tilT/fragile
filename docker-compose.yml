@@ -23,21 +23,6 @@ services:
       - "3100:3100"
     command: -config.file=/etc/loki/retention-config.yaml
 
-  prometheus:
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    image: prom/prometheus:v2.51.2
-    volumes:
-      - ./etc/prometheus:/workspace
-    command:
-      - --config.file=/workspace/prometheus.yml
-      - --enable-feature=exemplar-storage
-    depends_on:
-      - loki
-    logging: *default-logging
-    networks:
-      - stats
-
   grafana:
     stop_grace_period: 30s
     stop_signal: SIGTERM
@@ -45,16 +30,14 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./etc/grafana/data:/var/lib/grafana
-      - ./etc/grafana/provisioning:/etc/grafana/provisioning
-      - ./etc/dashboards:/etc/grafana/dashboards
+      - grafana-storage:/var/lib/grafana
     environment:
       GF_SECURITY_ADMIN_USER: "admin"
       GF_SECURITY_ADMIN_PASSWORD: "admin"
-      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      GF_PATHS_PROVISIONING: /var/lib/grafana/provisioning
+      GF_PATHS_DASHBOARDS: /var/lib/grafana/dashboards
     depends_on:
       - loki
-      - prometheus
     logging: *default-logging
     networks:
       - postgres
@@ -146,7 +129,7 @@ services:
     stop_signal: SIGTERM
     container_name: fragile-api
     build:
-      context: ./api
+      context: ./api/fragileAPI
       dockerfile: Dockerfile
     environment:
       - DB_HOST=postgres
@@ -159,8 +142,6 @@ services:
         condition: service_healthy
       loki:
         condition: service_started
-      authapi:
-        condition: service_healthy
     ports:
       - "8080:8080"
     networks:
@@ -177,7 +158,7 @@ services:
     environment:
       - APP_NAME=client
     build:
-      context: ./client
+      context: ./client/fragileClient
       dockerfile: Dockerfile
     ports:
       - "8137:8137"
@@ -194,6 +175,7 @@ volumes:
   fragile-data:
   pgadmin-data:
   loki-storage:
+  grafana-storage:
 
 
 networks:
