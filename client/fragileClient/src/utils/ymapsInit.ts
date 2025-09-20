@@ -1,5 +1,3 @@
-// src/utils/ymapsInit.ts
-import { YMaps } from '@pbe/react-yandex-maps';
 
 // Создаем промис для инициализации ymaps
 let ymapsPromise: Promise<any> | null = null;
