@@ -11,6 +11,8 @@ from datetime import datetime
 import logging
 from logging_loki import LokiHandler
 import json
+from apscheduler.schedulers.background import BackgroundScheduler
+import script
 
 def setup_loki_logging():
     logger = logging.getLogger('device-monitoring-api')
@@ -46,6 +48,11 @@ migration_manager.create_tables()
 device_repository = DeviceRepository(db_connection)
 incident_repository = IncidentRepository(db_connection)
 data_repository = DataRepository(db_connection)
+
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(script.replicate_database(), 'interval', seconds=90)
+scheduler.start()
 
 app = FastAPI(title="Device Monitoring API")
 
