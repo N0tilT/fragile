@@ -274,13 +274,49 @@ services:
       context: ./client/fragileClient
       dockerfile: Dockerfile
     ports:
-      - "8137:8137"
+      - "8137:5173"
     networks:
       - backend
       - gate
     labels:
       - "app=client"
       - "service=client"
+    logging: *default-logging
+  fragile-admin:
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    container_name: fragile-admin
+    environment:
+      - APP_NAME=admin1
+    build:
+      context: ./client/fragileAdmin
+      dockerfile: Dockerfile
+    ports:
+      - "8138:5173"
+    networks:
+      - backend
+      - gate
+    labels:
+      - "app=admin1"
+      - "service=admin1"
+    logging: *default-logging
+  fragile-admin2:
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    container_name: fragile-admin2
+    environment:
+      - APP_NAME=admin2
+    build:
+      context: ./client/fragileAdmin
+      dockerfile: Dockerfile
+    ports:
+      - "8139:5173"
+    networks:
+      - backend
+      - gate
+    labels:
+      - "app=admin2"
+      - "service=admin2"
     logging: *default-logging
 
 
