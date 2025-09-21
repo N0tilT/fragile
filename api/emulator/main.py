@@ -85,7 +85,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://fragile-client:8137", "http://fragile-client:5173"],
+    allow_origins=["http://fragile-client1:8137", "http://fragile-client1:5173","http://fragile-client2:8138", "http://fragile-client2:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

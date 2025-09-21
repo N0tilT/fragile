@@ -272,7 +272,7 @@ services:
     container_name: fragile-client1
     environment:
       - APP_NAME=client1
-      - VITE_EMULATOR_URL=front-emulator1:8080
+      - VITE_EMULATOR_URL=fragile-emulator1:8080
       - REACT_APP_ADMIN_CLIENTS=fragile-client2
     build:
       context: ./client/fragileClient
@@ -297,7 +297,7 @@ services:
     container_name: fragile-client2
     environment:
       - APP_NAME=client2
-      - VITE_EMULATOR_URL=front-emulator2:8080
+      - VITE_EMULATOR_URL=fragile-emulator1:8080
       - REACT_APP_ADMIN_CLIENTS=fragile-client1
     build:
       context: ./client/fragileClient
