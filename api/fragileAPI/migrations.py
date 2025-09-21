@@ -27,7 +27,7 @@ class MigrationManager:
                         status VARCHAR(32) NOT NULL,
                         price DECIMAL(10,2) NOT NULL,
                         device_id SERIAL references devices(id),
-                        datetime TIME WITH TIME ZONE NOT NULL
+                        datetime TIMESTAMP WITH TIME ZONE NOT NULL
                         )
             ''')
         cursor.execute('''
@@ -35,7 +35,7 @@ class MigrationManager:
                         id SERIAL PRIMARY KEY,
                         device_id SERIAL references devices(id),
                         value DECIMAL(10,2) NOT NULL,
-                        datetime TIME WITH TIME ZONE NOT NULL
+                        datetime TIMESTAMP WITH TIME ZONE NOT NULL
                         )
             ''')
         conn.commit()

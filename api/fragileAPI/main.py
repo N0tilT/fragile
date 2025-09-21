@@ -7,7 +7,7 @@ from device import Device
 from incident import Incident
 from data import Data
 from fastapi import FastAPI, HTTPException, Request
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from logging_loki import LokiHandler
 import json
@@ -53,9 +53,11 @@ db_connection = DatabaseConnection(db_config)
 
 migration_manager = MigrationManager(db_config)
 migration_manager.create_tables()
+migration_manager.prefill_devices()
 
 replicant_migration_manager = MigrationManager(replicantdb_config)
 replicant_migration_manager.create_tables()
+replicant_migration_manager.prefill_devices()
 
 device_repository = DeviceRepository(db_connection)
 incident_repository = IncidentRepository(db_connection)
@@ -206,7 +208,7 @@ async def create_data(data_data: dict):
         data = Data(
             device_id=data_data['device_id'],
             value=data_data['value'],
-            datetime=datetime.now()
+            datetime=datetime.now(timezone.utc)
         )
         created_data = data_repository.create_data(data)
         logger.info(f"Data entry created successfully: {created_data.id}")
