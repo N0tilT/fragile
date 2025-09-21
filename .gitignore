@@ -1,2 +1,3 @@
 api/emulator/Pipfile.lock
 api/emulator/Pipfile
+api/emulator/emulator.db

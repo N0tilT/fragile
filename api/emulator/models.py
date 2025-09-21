@@ -50,6 +50,14 @@ def create_settings():
 
 def get_data_by_datetime(datetime):
     datas = db.query(Data).filter(Data.datetime > datetime).all()
+    edge_value = db.query(Settings).first().edge_value
+    for data in datas:
+        if float(data.value) > edge_value:
+            data.level = "DANGER"
+        elif float(data.value) > edge_value-20:
+            data.level = "UNSTABLE"
+        else:
+            data.level = "CALM"
     # TODO: add level to each data.
     # edge_value = 70
     # for data in datas:
