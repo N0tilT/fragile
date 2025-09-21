@@ -222,10 +222,11 @@ services:
     environment:
       - APP_NAME=emulator1
       - TYPE=radio
-      - COORDINATES=[37.623082, 55.75254]  
+      - COORDINATES=[33.623082, 54.75254]  
       - EDGE_VALUE=70
       - RADIUS=1000
       - NUMBER=1
+      - INTERVAL=5
     depends_on:
       loki:
         condition: service_started
@@ -248,10 +249,11 @@ services:
     environment:
       - APP_NAME=emulator2
       - TYPE=sound
-      - COORDINATES=[40.623082, 50.75254]  
+      - COORDINATES=[33.623082, 50.75254]  
       - EDGE_VALUE=80
       - RADIUS=1000
       - NUMBER=2
+      - INTERVAL=5
     depends_on:
       loki:
         condition: service_started
@@ -264,12 +266,14 @@ services:
       - "service=backend"
     logging: *default-logging
 
-  fragile-client:
+  fragile-client1:
     stop_grace_period: 30s
     stop_signal: SIGTERM
-    container_name: fragile-client
+    container_name: fragile-client1
     environment:
-      - APP_NAME=client
+      - APP_NAME=client1
+      - VITE_EMULATOR_URL=front-emulator1:8080
+      - REACT_APP_ADMIN_CLIENTS=fragile-client2
     build:
       context: ./client/fragileClient
       dockerfile: Dockerfile
@@ -282,54 +286,35 @@ services:
         condition: service_started
     networks:
       - backend
-      - gate
     labels:
-      - "app=client"
-      - "service=client"
+      - "app=client1"
+      - "service=client1"
     logging: *default-logging
-  fragile-admin:
+
+  fragile-client2:
     stop_grace_period: 30s
     stop_signal: SIGTERM
-    container_name: fragile-admin
+    container_name: fragile-client2
     environment:
-      - APP_NAME=admin1
+      - APP_NAME=client2
+      - VITE_EMULATOR_URL=front-emulator2:8080
+      - REACT_APP_ADMIN_CLIENTS=fragile-client1
     build:
-      context: ./client/fragileAdmin
+      context: ./client/fragileClient
       dockerfile: Dockerfile
     ports:
       - "8138:5173"
     depends_on:
+      fragile-api:
+        condition: service_started
       fragile-emulator1:
         condition: service_started
     networks:
       - backend
-      - gate
     labels:
-      - "app=admin1"
-      - "service=admin1"
+      - "app=client2"
+      - "service=client2"
     logging: *default-logging
-  fragile-admin2:
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    container_name: fragile-admin2
-    environment:
-      - APP_NAME=admin2
-    build:
-      context: ./client/fragileAdmin
-      dockerfile: Dockerfile
-    ports:
-      - "8139:5173"
-    depends_on:
-      fragile-emulator2:
-        condition: service_started
-    networks:
-      - backend
-      - gate
-    labels:
-      - "app=admin2"
-      - "service=admin2"
-    logging: *default-logging
-
 
 volumes:
   fragile-data:

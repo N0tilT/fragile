@@ -5,6 +5,7 @@ RUN npm install -g npm@11.4.2
 
 COPY ./package*.json ./
 RUN npm install --legacy-peer-deps
+RUN npm i --save-dev @types/node  
 
 COPY . .
 
