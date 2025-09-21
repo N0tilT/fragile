@@ -14,7 +14,12 @@ import os
 SQLITE_DATABASE = "sqlite:///emulator.db"
 engine = create_engine(SQLITE_DATABASE)
 
+
 env = dotenv_values(".env")
+emulator_type=os.getenv('TYPE','radio'), 
+emulator_coordinates=os.getenv('COORDINATES','[37.623082, 55.75254]'), 
+emulator_edge_value=float(os.getenv('EDGE_VALUE','70')), 
+emulator_radius=float(os.getenv('RADIUS','1000'))
 
 Base = declarative_base()
 
@@ -44,7 +49,7 @@ db = Session()
 def create_settings():
     if db.query(Settings).first() is not None:
         return
-    settings = Settings(type=env['TYPE'], coordinates=env['COORDINATES'], edge_value=float(env['EDGE_VALUE']), radius=float(env['RADIUS']))
+    settings = Settings(type=emulator_type, coordinates=emulator_coordinates, edge_value=float(emulator_edge_value), radius=float(emulator_radius))
     db.add(settings)
     db.commit()
 

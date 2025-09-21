@@ -5,11 +5,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import logging
 from logging_loki import LokiHandler
 from dotenv import dotenv_values
+import os
 
-env = dotenv_values(".env")
+emulator_number = os.getenv('NUMBER','0')
 
 def setup_loki_logging():
-    logger = logging.getLogger(f'fragile-emulator{env['NUMBER']}')
+    logger = logging.getLogger(f'fragile-emulator{emulator_number}')
     logger.setLevel(logging.DEBUG)
     
     loki_handler = LokiHandler(

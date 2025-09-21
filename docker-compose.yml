@@ -151,6 +151,62 @@ services:
       - "service=backend"
     logging: *default-logging
 
+  fragile-emulator1:
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    container_name: fragile-emulator1
+    build:
+      context: ./api/emulator
+      dockerfile: Dockerfile
+    environment:
+      - APP_NAME=emulator1
+      - TYPE=radio
+      - COORDINATES=[37.623082, 55.75254]  
+      - EDGE_VALUE=70
+      - RADIUS=1000
+      - NUMBER=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      loki:
+        condition: service_started
+    ports:
+      - "8081:8080"
+    networks:
+      - backend
+    labels:
+      - "app=emulator1"
+      - "service=backend"
+    logging: *default-logging
+
+  fragile-emulator2:
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    container_name: fragile-emulator2
+    build:
+      context: ./api/emulator
+      dockerfile: Dockerfile
+    environment:
+      - APP_NAME=emulator2
+      - TYPE=sound
+      - COORDINATES=[40.623082, 50.75254]  
+      - EDGE_VALUE=80
+      - RADIUS=1000
+      - NUMBER=2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      loki:
+        condition: service_started
+    ports:
+      - "8081:8080"
+    networks:
+      - backend
+    labels:
+      - "app=emulator1"
+      - "service=backend"
+    logging: *default-logging
+
   fragile-client:
     stop_grace_period: 30s
     stop_signal: SIGTERM
