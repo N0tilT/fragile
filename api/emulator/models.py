@@ -101,3 +101,4 @@ def create_data():
     db.add(data)
     db.commit()
     print(f'Data:{data.value}, {data.datetime}')
+    return data

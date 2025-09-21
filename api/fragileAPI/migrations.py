@@ -43,3 +43,33 @@ class MigrationManager:
         #Deinitialize
         cursor.close()
         conn.close()
+
+    def prefill_devices(self):
+        #Initialize
+        conn = self.connection.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            INSERT INTO devices (name, type, coordinates)
+            VALUES (%s, %s, %s) RETURNING id
+        ''', ("Radio-device", "radio", "[37.623082, 55.75254]"))
+
+        cursor.execute('''
+            INSERT INTO devices (name, type, coordinates)
+            VALUES (%s, %s, %s) RETURNING id
+        ''', ("Radio-device2", "radio", "[40.623082, 60.75254]"))
+
+        cursor.execute('''
+            INSERT INTO devices (name, type, coordinates)
+            VALUES (%s, %s, %s) RETURNING id
+        ''', ("Sound-device", "sound", "[38.623082, 56.75254]"))
+
+        cursor.execute('''
+            INSERT INTO devices (name, type, coordinates)
+            VALUES (%s, %s, %s) RETURNING id
+        ''', ("Laser-device", "laser", "[36.623082, 55.75254]"))
+        
+        conn.commit()
+        #Deinitialize
+        cursor.close()
+        conn.close()

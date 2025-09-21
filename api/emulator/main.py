@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException
 from models import *
 from pydantic import BaseModel
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -6,8 +6,12 @@ import logging
 from logging_loki import LokiHandler
 from dotenv import dotenv_values
 import os
+import asyncio
+import json
+
 
 emulator_number = os.getenv('NUMBER','0')
+clients =[]
 
 def setup_loki_logging():
     logger = logging.getLogger(f'fragile-emulator{emulator_number}')
@@ -37,10 +41,30 @@ class Settings(BaseModel):
     radius: float
 def custom_datetime_parser(date_str):
     return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%f')
+async def send_message_to_clients():
+    for client in clients:
+        data=create_data()
+        settings = get_settings()
+        if float(data.value) > settings.edge_value:
+            data.level = "DANGER"
+        elif float(data.value) > settings.edge_value-20:
+            data.level = "UNSTABLE"
+        else:
+            data.level = "CALM"
+        json_data = json.dumps({
+                "value": data.value,
+                "datetime": data.datetime.isoformat(),
+                "radius": settings.radius,
+                "coordinates": settings.coordinates,
+                "type": settings.type,
+                "level": data.level
+        })
+        await client.send_text(json_data)
 
-
+def job():
+        asyncio.run(send_message_to_clients())
 scheduler = BackgroundScheduler()
-scheduler.add_job(create_data, 'interval', seconds=30)
+scheduler.add_job(job, 'interval', seconds=30)
 scheduler.start()
 
 app = FastAPI()
@@ -92,7 +116,7 @@ async def log_requests(request: Request, call_next):
         raise
 
 @app.get("/get_data_by_datetime/{datetime}")
-async def get_all_data_by_datetime(datetime: datetime.datetime):
+def get_all_data_by_datetime(datetime: datetime.datetime):
     settings = get_settings()
     return {"data": get_data_by_datetime(datetime), "radius": settings.radius, "coordinates": settings.coordinates, "type": settings.type}
 
@@ -100,3 +124,10 @@ async def get_all_data_by_datetime(datetime: datetime.datetime):
 @app.post("/post_setiings")
 async def post_settings(settings: Settings):
     return {"settings":change_settings(settings.type, settings.coordinates, settings.edge_value, settings.radius)} 
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    clients.append(websocket)
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        await websocket.send_text(f"Вы сказали: {data}")
