@@ -32,7 +32,6 @@ class DatabaseConnection:
     
     def get_connection(self):
         if self._connection is None or self._connection.closed:
-            print(self.config.get_connection_params())
             self._connection = psycopg2.connect(**self.config.get_connection_params())
         return self._connection
 

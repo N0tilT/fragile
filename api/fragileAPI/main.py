@@ -15,12 +15,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import script
 
 def setup_loki_logging():
-    logger = logging.getLogger('device-monitoring-api')
-    logger.setLevel(logging.INFO)
+    logger = logging.getLogger('fragile-api')
+    logger.setLevel(logging.DEBUG)
     
     loki_handler = LokiHandler(
         url='http://loki:3100/loki/api/v1/push',
-        tags={"application": "device-monitoring-api"},
+        tags={"application": "fragile-api"},
         version="1"
     )
     
@@ -29,6 +29,7 @@ def setup_loki_logging():
     logger.addHandler(loki_handler)
     
     return logger
+
 
 logger = setup_loki_logging()
 
@@ -63,8 +64,6 @@ async def log_requests(request: Request, call_next):
     try:
         response = await call_next(request)
         process_time = (datetime.now() - start_time).total_seconds() * 1000
-        
-        # Log with flat key-value pairs for labels
         logger.info(
             f"Request processed - {request.method} {request.url.path}",
             extra={
@@ -90,6 +89,14 @@ async def log_requests(request: Request, call_next):
             }
         )
         raise
+
+@app.get("/test-logs")
+async def test_logs():
+    logger.debug("This is a DEBUG message")
+    logger.info("This is an INFO message")
+    logger.warning("This is a WARNING message")
+    logger.error("This is an ERROR message")
+    return {"status": "test logs generated"}
 
 @app.get("/")
 async def root():

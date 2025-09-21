@@ -8,14 +8,13 @@ from dotenv import dotenv_values
 
 env = dotenv_values(".env")
 
-
 def setup_loki_logging():
-    logger = logging.getLogger('device-monitoring-api')
-    logger.setLevel(logging.INFO)
+    logger = logging.getLogger(f'fragile-emulator{env['NUMBER']}')
+    logger.setLevel(logging.DEBUG)
     
     loki_handler = LokiHandler(
         url='http://loki:3100/loki/api/v1/push',
-        tags={"application": "device-monitoring-api"},
+        tags={"application": "fragile-api"},
         version="1"
     )
     
@@ -94,7 +93,7 @@ async def log_requests(request: Request, call_next):
 @app.get("/get_data_by_datetime/{datetime}")
 async def get_all_data_by_datetime(datetime: datetime.datetime):
     data = get_data_by_datetime(datetime)
-    
+
     return {"data": get_data_by_datetime(datetime), "radius": get_settings_radius()}
 
 
