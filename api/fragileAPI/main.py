@@ -49,7 +49,6 @@ data_repository = DataRepository(db_connection)
 
 app = FastAPI(title="Device Monitoring API")
 
-# Middleware для логирования запросов
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = datetime.now()
@@ -58,16 +57,15 @@ async def log_requests(request: Request, call_next):
         response = await call_next(request)
         process_time = (datetime.now() - start_time).total_seconds() * 1000
         
+        # Log with flat key-value pairs for labels
         logger.info(
-            "Request processed",
+            f"Request processed - {request.method} {request.url.path}",
             extra={
-                'tags': {
-                    'method': request.method,
-                    'url': str(request.url),
-                    'status_code': response.status_code,
-                    'process_time_ms': process_time,
-                    'client_host': request.client.host if request.client else None
-                }
+                'method': request.method,
+                'path': request.url.path,
+                'status_code': response.status_code,
+                'process_time_ms': str(process_time),
+                'client_host': request.client.host if request.client else 'unknown'
             }
         )
         
@@ -78,12 +76,10 @@ async def log_requests(request: Request, call_next):
         logger.error(
             f"Request failed: {str(e)}",
             extra={
-                'tags': {
-                    'method': request.method,
-                    'url': str(request.url),
-                    'process_time_ms': process_time,
-                    'error': str(e)
-                }
+                'method': request.method,
+                'path': request.url.path,
+                'process_time_ms': str(process_time),
+                'error': str(e)
             }
         )
         raise

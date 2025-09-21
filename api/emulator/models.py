@@ -50,6 +50,18 @@ def create_settings():
 
 def get_data_by_datetime(datetime):
     datas = db.query(Data).filter(Data.datetime > datetime).all()
+    # TODO: add level to each data.
+    # edge_value = 70
+    # for data in datas:
+    #   if data > 70:
+    #        level = "DANGER"
+    #   if data > 50:
+    #        level = "UNSTABLE" 
+    #   else:
+    #        level = "CALM"
+    # data:[
+    #    {"value":100,"level":"DANGER"},{"value":60,"level":"UNSTABLE"},{"value":5,"level":"CALM"}
+    #]
     return datas
 def change_settings(type, coordinates, edge_value, radius):
     settings_original = db.query(Settings).first()
