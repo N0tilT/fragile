@@ -20,12 +20,14 @@ def replicate_database(database_target, database_source):
     
 
     cursor_source.execute("SELECT * FROM incidents WHERE datetime > %s", (target_datetime,))
-    for row in cursor_source.fetchall():
-        cursor_target.execute("INSERT INTO incidents (name, description, status, price, device_id, datetime) VALUES (%s, %s, %s, %s, %s, %s)", row)
+    if cursor_source.rowcount != 0:
+        for row in cursor_source.fetchall():
+            cursor_target.execute("INSERT INTO incidents (name, description, status, price, device_id, datetime) VALUES (%s, %s, %s, %s, %s, %s)", row)
     
     cursor_source.execute("SELECT * FROM data WHERE datetime > %s", (target_datetime,))
-    for row in cursor_source.fetchall():
-        cursor_target.execute("INSERT INTO data (device_id, value, datetime) VALUES (%s, %s, %s)", row)
+    if cursor_source.rowcount != 0:
+        for row in cursor_source.fetchall():
+            cursor_target.execute("INSERT INTO data (device_id, value, datetime) VALUES (%s, %s, %s)", row)
 
     cursor_target.close()
     db_connection_target.close_connection()
