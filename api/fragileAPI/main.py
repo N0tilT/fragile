@@ -63,7 +63,7 @@ data_repository = DataRepository(db_connection)
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(script.replicate_database(db_config,replicantdb_config), 'interval', seconds=90)
+scheduler.add_job(script.replicate_database, 'interval',  args=[db_config,replicantdb_config],seconds=90)
 scheduler.start()
 
 app = FastAPI(title="FragileAPI")
