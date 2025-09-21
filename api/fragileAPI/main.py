@@ -7,6 +7,7 @@ from device import Device
 from incident import Incident
 from data import Data
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone
 import logging
 from logging_loki import LokiHandler
@@ -69,6 +70,15 @@ scheduler.add_job(script.replicate_database, 'interval',  args=[db_config,replic
 scheduler.start()
 
 app = FastAPI(title="FragileAPI")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://fragile-client3:8137", "http://fragile-client3:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):

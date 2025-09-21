@@ -272,7 +272,7 @@ services:
     container_name: fragile-client1
     environment:
       - APP_NAME=client1
-      - VITE_EMULATOR_URL=fragile-emulator1:8080
+      - VITE_EMULATOR_URL=172.31.0.39:8081
       - REACT_APP_ADMIN_CLIENTS=fragile-client2
     build:
       context: ./client/fragileClient
@@ -297,7 +297,7 @@ services:
     container_name: fragile-client2
     environment:
       - APP_NAME=client2
-      - VITE_EMULATOR_URL=fragile-emulator1:8080
+      - VITE_EMULATOR_URL=172.31.0.39:8082
       - REACT_APP_ADMIN_CLIENTS=fragile-client1
     build:
       context: ./client/fragileClient
@@ -314,6 +314,32 @@ services:
     labels:
       - "app=client2"
       - "service=client2"
+    logging: *default-logging
+
+
+  fragile-client3:
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    container_name: fragile-client3
+    environment:
+      - APP_NAME=client3
+      - VITE_EMULATOR_URL=172.31.0.39:8082
+      - REACT_APP_ADMIN_CLIENTS=fragile-client1
+    build:
+      context: ./client/fragileAdmin
+      dockerfile: Dockerfile
+    ports:
+      - "8139:5173"
+    depends_on:
+      fragile-api:
+        condition: service_started
+      fragile-emulator1:
+        condition: service_started
+    networks:
+      - backend
+    labels:
+      - "app=client3"
+      - "service=client3"
     logging: *default-logging
 
 volumes:
