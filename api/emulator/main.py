@@ -15,7 +15,7 @@ def setup_loki_logging():
     
     loki_handler = LokiHandler(
         url='http://loki:3100/loki/api/v1/push',
-        tags={"application": "fragile-api"},
+        tags={"application": f"fragile-emulator{emulator_number}"},
         version="1"
     )
     
