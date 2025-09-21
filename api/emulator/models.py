@@ -7,15 +7,11 @@ import random
 from datetime import timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from dotenv import dotenv_values, load_dotenv
 import os
-
 
 SQLITE_DATABASE = "sqlite:///emulator.db"
 engine = create_engine(SQLITE_DATABASE)
 
-
-env = dotenv_values(".env")
 emulator_type=os.getenv('TYPE','radio'), 
 emulator_coordinates=os.getenv('COORDINATES','[37.623082, 55.75254]'), 
 emulator_edge_value=float(os.getenv('EDGE_VALUE','70')), 

@@ -1,12 +1,10 @@
 from database import DatabaseConfig,DatabaseConnection
 
 # Функция для копирования БД
-# database_target - имя БД, куда копируется БД database_source,
-# database_source - имя БД, которая копируется
+# config_source - конфигурация БД, которая копируется
+# config_target - конфигурация БД, куда копируется БД database_source,
 #дублируются данные incident, data
-def replicate_database(database_target, database_source):
-    config_target = DatabaseConfig(database_target)
-    config_source = DatabaseConfig(database_source)
+def replicate_database(config_source, config_target):
     db_connection_target = DatabaseConnection(config_target)
     db_connection_source = DatabaseConnection(config_source)
     db_connection_target.get_connection()

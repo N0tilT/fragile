@@ -41,10 +41,21 @@ db_config = DatabaseConfig(
     5432
 )
 
+replicantdb_config = DatabaseConfig(
+    'fragiledb2',
+    'postgres2',
+    'postgres',
+    '123Secret_a',
+    5432
+)
+
 db_connection = DatabaseConnection(db_config)
 
 migration_manager = MigrationManager(db_config)
 migration_manager.create_tables()
+
+replicant_migration_manager = MigrationManager(replicantdb_config)
+replicant_migration_manager.create_tables()
 
 device_repository = DeviceRepository(db_connection)
 incident_repository = IncidentRepository(db_connection)
@@ -52,10 +63,10 @@ data_repository = DataRepository(db_connection)
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(script.replicate_database(), 'interval', seconds=90)
+scheduler.add_job(script.replicate_database(db_config,replicantdb_config), 'interval', seconds=90)
 scheduler.start()
 
-app = FastAPI(title="Device Monitoring API")
+app = FastAPI(title="FragileAPI")
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
