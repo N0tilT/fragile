@@ -25,7 +25,7 @@ class MigrationManager:
                         name VARCHAR(256) NOT NULL,
                         description VARCHAR(256) NOT NULL,
                         status VARCHAR(32) NOT NULL,
-                        price DECIMAL(10,2) NOT NULL,
+                        coordinates VARCHAR(128) NOT NULL,
                         device_id SERIAL references devices(id),
                         datetime TIMESTAMP WITH TIME ZONE NOT NULL
                         )

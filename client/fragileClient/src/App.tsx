@@ -5,6 +5,7 @@ import { useState, useCallback, useRef } from 'react'
 import type { MapObject } from './variables'
 import type { YMapLocationRequest } from '@yandex/ymaps3-types'
 import { MAP_OBJECTS } from './variables'
+import WebSocketClient from './components/WebSockerClient'
 
 function App() {
   const [selectedObject, setSelectedObject] = useState<MapObject | null>(null)
@@ -44,6 +45,7 @@ function App() {
 
   return (
     <div className="app-container">
+      <WebSocketClient/>
       <EventFeed 
         selectedObject={selectedObject}
         onEventClick={handleEventClick}

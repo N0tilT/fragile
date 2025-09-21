@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from models import *
 from pydantic import BaseModel
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -31,9 +32,6 @@ def setup_loki_logging():
 
 logger = setup_loki_logging()
 
-
-
-
 class Settings(BaseModel):
     type: str
     coordinates: str
@@ -41,25 +39,38 @@ class Settings(BaseModel):
     radius: float
 def custom_datetime_parser(date_str):
     return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%f')
+
 async def send_message_to_clients():
+    disconnected_clients = []
     for client in clients:
-        data=create_data()
-        settings = get_settings()
-        if float(data.value) > settings.edge_value:
-            data.level = "DANGER"
-        elif float(data.value) > settings.edge_value-20:
-            data.level = "UNSTABLE"
-        else:
-            data.level = "CALM"
-        json_data = json.dumps({
+        try:
+            data = create_data()
+            settings = get_settings()
+            if float(data.value) > settings.edge_value:
+                data.level = "DANGER"
+            elif float(data.value) > settings.edge_value - 20:
+                data.level = "UNSTABLE"
+            else:
+                data.level = "CALM"
+            json_data = json.dumps({
                 "value": data.value,
                 "datetime": data.datetime.isoformat(),
                 "radius": settings.radius,
                 "coordinates": settings.coordinates,
                 "type": settings.type,
                 "level": data.level
-        })
-        await client.send_text(json_data)
+            })
+            await client.send_text(json_data)
+        except (WebSocketDisconnect, RuntimeError) as e:
+            logger.error(f"Client disconnected: {e}")
+            disconnected_clients.append(client)
+        except Exception as e:
+            logger.error(f"Unexpected error when sending data: {e}")
+            disconnected_clients.append(client)
+    
+    for client in disconnected_clients:
+        if client in clients:
+            clients.remove(client)
 
 def job():
         asyncio.run(send_message_to_clients())
@@ -69,6 +80,15 @@ scheduler.start()
 
 app = FastAPI()
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://fragile-client:8137", "http://fragile-client:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.on_event("shutdown")
 async def shutdown_event():
     scheduler.shutdown()
@@ -76,6 +96,7 @@ async def shutdown_event():
 @app.on_event("startup")
 async def startup_event(): 
     create_settings()
+
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -124,10 +145,18 @@ def get_all_data_by_datetime(datetime: datetime.datetime):
 @app.post("/post_setiings")
 async def post_settings(settings: Settings):
     return {"settings":change_settings(settings.type, settings.coordinates, settings.edge_value, settings.radius)} 
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    clients.append(websocket)
     await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        await websocket.send_text(f"Вы сказали: {data}")
+    clients.append(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Received: {data}")
+    except WebSocketDisconnect:
+        clients.remove(websocket)
+        logger.info("Client disconnected")
+    except Exception as e:
+        clients.remove(websocket)
+        logger.error(f"Unexpected error: {e}")

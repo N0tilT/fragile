@@ -165,7 +165,7 @@ async def create_incident(incident_data: dict):
             name=incident_data['name'],
             description=incident_data['description'],
             status=incident_data['status'],
-            price=incident_data['price'],
+            coordinates=incident_data['coordinates'],
             device_id=incident_data['device_id'],
             datetime=datetime.now()
         )

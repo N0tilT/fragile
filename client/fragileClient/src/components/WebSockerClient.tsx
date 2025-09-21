@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface SensorData {
   value: string;
@@ -11,43 +11,105 @@ interface SensorData {
 
 const WebSocketClient: React.FC = () => {
   const [data, setData] = useState<SensorData | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'Connecting' | 'Connected' | 'Disconnected'>('Connecting');
+  const [connectionStatus, setConnectionStatus] = useState<'Connecting' | 'Connected' | 'Disconnected' | 'Error'>('Connecting');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const ws = useRef<WebSocket | null>(null);
+  const reconnectTimeout = useRef<number | null>(null);
+
+  const connectWebSocket = () => {
+    try {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsHost = window.location.hostname;
+      const wsPort = '8081';
+      ws.current = new WebSocket(`${protocol}//${wsHost}:${wsPort}/ws`);
+      
+      ws.current.onopen = () => {
+        setConnectionStatus('Connected');
+        setErrorMessage('');
+        console.log('WebSocket connected');
+      };
+
+      ws.current.onmessage = (event) => {
+        try {
+          const newData: SensorData = JSON.parse(event.data);
+          setData(newData);
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+          setErrorMessage('Ошибка обработки данных с сервера');
+        }
+      };
+
+      ws.current.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setConnectionStatus('Error');
+        setErrorMessage('Ошибка соединения с сервером.');
+      };
+
+      ws.current.onclose = (event) => {
+        console.log('WebSocket disconnected', event.code, event.reason);
+        setConnectionStatus('Disconnected');
+        
+        if (reconnectTimeout.current) {
+          window.clearTimeout(reconnectTimeout.current);
+        }
+        reconnectTimeout.current = window.setTimeout(() => {
+          setConnectionStatus('Connecting');
+          connectWebSocket();
+        }, 5000);
+      };
+    } catch (error) {
+      console.error('Failed to create WebSocket:', error);
+      setConnectionStatus('Error');
+      setErrorMessage('Не удалось установить соединение');
+    }
+  };
 
   useEffect(() => {
-    const ws = new WebSocket('ws://fragile-emulator1:8080/ws');
-
-    ws.onopen = () => {
-      setConnectionStatus('Connected');
-      console.log('WebSocket connected');
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const newData: SensorData = JSON.parse(event.data);
-        setData(newData);
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    ws.onclose = () => {
-      setConnectionStatus('Disconnected');
-      console.log('WebSocket disconnected');
-    };
+    connectWebSocket();
 
     return () => {
-      ws.close();
+      if (reconnectTimeout.current) {
+        window.clearTimeout(reconnectTimeout.current);
+      }
+      if (ws.current) {
+        ws.current.close();
+      }
     };
   }, []);
+
+  const handleReconnect = () => {
+    if (reconnectTimeout.current) {
+      window.clearTimeout(reconnectTimeout.current);
+    }
+    setConnectionStatus('Connecting');
+    connectWebSocket();
+  };
 
   return (
     <div style={{ padding: '20px' }}>
       <h1>Sensor Data Monitor</h1>
-      <p>Status: {connectionStatus}</p>
+      <p>Status: 
+        <span style={{
+          color: connectionStatus === 'Connected' ? 'green' : 
+                 connectionStatus === 'Connecting' ? 'orange' : 'red',
+          fontWeight: 'bold',
+          marginLeft: '10px'
+        }}>
+          {connectionStatus}
+        </span>
+      </p>
+      
+      {errorMessage && (
+        <div style={{ color: 'red', margin: '10px 0' }}>
+          {errorMessage}
+        </div>
+      )}
+      
+      {connectionStatus === 'Disconnected' && (
+        <button onClick={handleReconnect} style={{ margin: '10px 0' }}>
+          Переподключиться
+        </button>
+      )}
       
       {data && (
         <div>

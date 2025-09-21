@@ -8,6 +8,6 @@ class Incident:
     name: str = ""
     description: str = ""
     status: str = ""
-    price: float = 0.0
+    coordinates: str = ""
     device_id: int = 0
     datetime: datetime = None

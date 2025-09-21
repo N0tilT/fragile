@@ -275,6 +275,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8137:5173"
+    depends_on:
+      fragile-api:
+        condition: service_started
+      fragile-emulator1:
+        condition: service_started
     networks:
       - backend
       - gate
@@ -293,6 +298,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8138:5173"
+    depends_on:
+      fragile-emulator1:
+        condition: service_started
     networks:
       - backend
       - gate
@@ -311,6 +319,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8139:5173"
+    depends_on:
+      fragile-emulator2:
+        condition: service_started
     networks:
       - backend
       - gate

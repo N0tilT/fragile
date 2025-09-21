@@ -10,10 +10,10 @@ class IncidentRepository:
         cursor = conn.cursor()
         
         cursor.execute('''
-            INSERT INTO incidents (name, description, status, price, device_id, datetime)
+            INSERT INTO incidents (name, description, status, coordinates, device_id, datetime)
             VALUES (%s, %s, %s, %s, %s, %s) RETURNING id
         ''', (incident.name, incident.description, incident.status, 
-              incident.price, incident.device_id, incident.datetime))
+              incident.coordinates, incident.device_id, incident.datetime))
         
         incident.id = cursor.fetchone()[0]
         conn.commit()
@@ -57,10 +57,10 @@ class IncidentRepository:
         cursor.execute('''
             UPDATE incidents 
             SET name = %s, description = %s, status = %s, 
-                price = %s, device_id = %s, datetime = %s
+                coordinates = %s, device_id = %s, datetime = %s
             WHERE id = %s
         ''', (incident.name, incident.description, incident.status,
-              incident.price, incident.device_id, incident.datetime, incident.id))
+              incident.coordinates, incident.device_id, incident.datetime, incident.id))
         
         conn.commit()
         cursor.close()
