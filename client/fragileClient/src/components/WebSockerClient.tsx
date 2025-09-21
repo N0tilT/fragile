@@ -32,6 +32,8 @@ const WebSocketClient: React.FC = () => {
       ws.current.onmessage = (event) => {
         try {
           const newData: SensorData = JSON.parse(event.data);
+          //TODO: add to local DB
+          //TODO: send to other clients
           setData(newData);
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
