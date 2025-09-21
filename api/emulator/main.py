@@ -12,6 +12,7 @@ import json
 
 
 emulator_number = os.getenv('NUMBER','0')
+emulator_interval= int(os.getenv('INTERVAL','10'))
 clients =[]
 
 def setup_loki_logging():
@@ -37,6 +38,7 @@ class Settings(BaseModel):
     coordinates: str
     edge_value: float
     radius: float
+    
 def custom_datetime_parser(date_str):
     return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%f')
 
@@ -75,7 +77,7 @@ async def send_message_to_clients():
 def job():
         asyncio.run(send_message_to_clients())
 scheduler = BackgroundScheduler()
-scheduler.add_job(job, 'interval', seconds=30)
+scheduler.add_job(job, 'interval', seconds=emulator_interval)
 scheduler.start()
 
 app = FastAPI()

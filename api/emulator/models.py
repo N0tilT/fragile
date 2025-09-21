@@ -45,7 +45,7 @@ db = Session()
 def create_settings():
     if db.query(Settings).first() is not None:
         return
-    settings = Settings(type=emulator_type, coordinates=emulator_coordinates, edge_value=float(emulator_edge_value), radius=float(emulator_radius))
+    settings = Settings(type=emulator_type[0], coordinates=emulator_coordinates[0], edge_value=emulator_edge_value[0], radius=emulator_radius)
     db.add(settings)
     db.commit()
 
