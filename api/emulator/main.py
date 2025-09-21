@@ -93,9 +93,8 @@ async def log_requests(request: Request, call_next):
 
 @app.get("/get_data_by_datetime/{datetime}")
 async def get_all_data_by_datetime(datetime: datetime.datetime):
-    data = get_data_by_datetime(datetime)
-
-    return {"data": get_data_by_datetime(datetime), "radius": get_settings_radius()}
+    settings = get_settings()
+    return {"data": get_data_by_datetime(datetime), "radius": settings.radius, "coordinates": settings.coordinates, "type": settings.type}
 
 
 @app.post("/post_setiings")

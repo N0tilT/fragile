@@ -63,6 +63,7 @@ def get_data_by_datetime(datetime):
             data.level = "UNSTABLE"
         else:
             data.level = "CALM"
+
     # TODO: add level to each data.
     # edge_value = 70
     # for data in datas:
@@ -87,8 +88,8 @@ def change_settings(type, coordinates, edge_value, radius):
     print(settings_original.type, settings_original.coordinates, settings_original.edge_value, settings_original.radius)
     return settings_original
 
-def get_settings_radius():
-    return db.query(Settings).first().radius
+def get_settings():
+    return db.query(Settings).first()
 def generate_data():
     datas = []
     current_datetime = datetime.datetime.now().replace(hour=0, minute=0, second=0)
