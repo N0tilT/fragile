@@ -1,104 +1,81 @@
-import { useState } from "react";
-import type { Incident } from "./types";
-import {IncidentList} from "./List";
-import {IncidentMap} from "./Map";
-import { testIncidents } from "./data/testData";
+import './App.css'
+import MapComponent from './components/MapComponent'
+import EventFeed from './components/EventFeed'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import type { MapObject } from './variables'
+import type { YMapLocationRequest } from '@yandex/ymaps3-types'
+import { MAP_OBJECTS } from './variables'
+import ApiAdmin from './components/ApiAdmin'
+
 function App() {
-  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
-  const [activeTab, setActiveTab] = useState<'map' | 'list'>('map');
+  // Загрузка начального состояния из localStorage
+  const [selectedObject, setSelectedObject] = useState<MapObject | null>(null)
+  const [mapLocation, setMapLocation] = useState<YMapLocationRequest | null>(null)
+  const [objects, setObjects] = useState<MapObject[]>(() => {
+    const stored = localStorage.getItem('mapObjects');
+    return stored ? JSON.parse(stored) : MAP_OBJECTS;
+  });
+  const objectsRef = useRef<MapObject[]>(objects)
 
-  const handleIncidentSelect = (incident: Incident | null) => {
-    setSelectedIncident(incident);
-    if (incident) {
-      setActiveTab('map');
+  // Сохранение объектов в localStorage при изменении
+  useEffect(() => {
+    localStorage.setItem('mapObjects', JSON.stringify(objects));
+    objectsRef.current = objects;
+  }, [objects]);
+
+  // Функция для добавления нового объекта
+  const addNewObject = useCallback(() => {
+    const newId = String(objectsRef.current.length + 1)
+    const newObject: MapObject = {
+      id: newId,
+      coordinates: [37.618536 + (Math.random() - 0.5) * 0.1, 55.760257 + (Math.random() - 0.5) * 0.05],
+      radius: 1000 + Math.random() * 1000,
+      color: `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`,
+      name: `Новый объект ${newId}`,
+      description: 'Автоматически добавленный объект',
+      imageSrc: './Objects.svg'
     }
-  };
 
-  const handleIncidentSelectFromList = (incident: Incident) => {
-    setSelectedIncident(incident);
-    setActiveTab('map');
-  };
+    setObjects(prev => [...prev, newObject])
+  }, [])
 
-  const handleResolveIncident = (incidentId: number) => {
-    // Логика для решения инцидента
-    console.log(`Инцидент ${incidentId} отмечен как решенный`);
-    // Здесь можно добавить обновление состояния или API вызов
-    if (selectedIncident?.id === incidentId) {
-      setSelectedIncident(null);
-    }
-  };
+  const handleEventClick = useCallback((object: MapObject) => {
+    setSelectedObject(object)
+    setMapLocation({
+      center: object.coordinates,
+      zoom: 12,
+      duration: 1000
+    })
+  }, [])
+
+  const handleMapClick = useCallback(() => {
+    setSelectedObject(null)
+  }, [])
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>Система управления инцидентами</p>
-      </header>
-      
-      <div className="tabs">
-        <button 
-          className={activeTab === 'map' ? 'active' : ''}
-          onClick={() => setActiveTab('map')}
-        >
-          Карта
-        </button>
-        <button 
-          className={activeTab === 'list' ? 'active' : ''}
-          onClick={() => setActiveTab('list')}
-        >
-          Список инцидентов
-        </button>
-      </div>
-      
-      <main className="main-content">
-        {activeTab === 'map' ? (
-          <IncidentMap incidents={[]} onIncidentSelect={function (incident: Incident): void {
-            throw new Error("Function not implemented.");
-          } } onResolveIncident={function (incidentId: number): void {
-            throw new Error("Function not implemented.");
-          } }          />
-        ) : (
-          <IncidentList 
-            incidents={testIncidents} 
-            onIncidentSelect={handleIncidentSelectFromList}
-            onResolveIncident={handleResolveIncident}
-          />
-        )}
-      </main>
-      
-      {selectedIncident && (
-        <div className="sidebar">
-          <button 
-            className="close-sidebar"
-            onClick={() => setSelectedIncident(null)}
-          >
-          
-          </button>
-          <h2>{selectedIncident.name}</h2>
-          <p><strong>Точная дата:</strong> {new Date(selectedIncident.date).toLocaleString()}</p>
-          <p><strong>Координаты центра:</strong> {selectedIncident.center[0].toFixed(4)}, {selectedIncident.center[1].toFixed(4)}</p>
-          <p><strong>Статус:</strong> {
-            selectedIncident.severity === 'high' ? 'Высокая важность' : 
-            selectedIncident.severity === 'medium' ? 'Средняя важность' : 'Низкая важность'
-          }</p>
-          <p>{selectedIncident.description}</p>
-          <div className="sidebar-actions">
-            <button 
-              className="view-on-map-btn"
-              onClick={() => setActiveTab('map')}
-            >
-              Показать на карте
-            </button>
-            <button 
-              className="resolve-btn"
-              onClick={() => handleResolveIncident(selectedIncident.id)}
-            >
-              Решить инцидент
-            </button>
-          </div>
-        </div>
-      )}
+    <div className="app-container">
+      <ApiAdmin objects={objects} setObjects={setObjects} />
+      <EventFeed
+        selectedObject={selectedObject}
+        onEventClick={handleEventClick}
+        objects={objects}
+      />
+      <button
+        className="add-object-btn"
+        onClick={addNewObject}
+        style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1000, padding: '10px' }}
+      >
+        Добавить объект
+      </button>
+      <MapComponent
+        selectedObject={selectedObject}
+        location={mapLocation}
+        onMapClick={handleMapClick}
+        onMarkerClick={handleEventClick}
+        objects={objects}
+      />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
