@@ -148,6 +148,7 @@ async def get_incidents():
     try:
         logger.info("Fetching all incidents")
         incidents = incident_repository.get_all()
+        incidents = sorted(incidents, key=lambda x: x.datetime, reverse=True)
         logger.info(f"Retrieved {len(incidents)} incidents")
         return incidents
     except Exception as e:
@@ -179,6 +180,7 @@ async def get_data():
     try:
         logger.info("Fetching all data entries")
         data_entries = data_repository.get_all()
+        data_entries = sorted(data_entries, key=lambda x: x.datetime, reverse=True)
         logger.info(f"Retrieved {len(data_entries)} data entries")
         return data_entries
     except Exception as e:
@@ -190,6 +192,7 @@ async def get_data_by_device(device_id: int):
     try:
         logger.info(f"Fetching data for device: {device_id}")
         data_entries = data_repository.get_by_device_id(device_id)
+        data_entries = sorted(data_entries, key=lambda x: x.datetime, reverse=True)
         logger.info(f"Retrieved {len(data_entries)} data entries for device {device_id}")
         return data_entries
     except Exception as e:
