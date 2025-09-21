@@ -1,18 +1,19 @@
 import React from 'react'
-import { type MapObject, MAP_OBJECTS } from '../variables'
+import { type MapObject } from '../variables'
 import '../EventFeed.css'
 
 interface EventFeedProps {
   selectedObject: MapObject | null
   onEventClick: (object: MapObject) => void
+  objects: MapObject[] // Добавляем пропс для объектов
 }
 
-const EventFeed: React.FC<EventFeedProps> = ({ selectedObject, onEventClick }) => {
+const EventFeed: React.FC<EventFeedProps> = ({ selectedObject, onEventClick, objects }) => {
   return (
     <div className="event-feed">
       <h2 className="event-feed-title">Экстренные ситуации</h2>
       <div className="events-list">
-        {MAP_OBJECTS.map(obj => (
+        {objects.map(obj => (
           <div
             key={obj.id}
             className={`event-card ${selectedObject?.id === obj.id ? 'selected' : ''}`}
