@@ -1,7 +1,7 @@
 import './App.css'
 import MapComponent from './components/MapComponent'
 import EventFeed from './components/EventFeed'
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import type { MapObject } from './variables'
 import type { YMapLocationRequest } from '@yandex/ymaps3-types'
 import { MAP_OBJECTS } from './variables'
@@ -10,21 +10,8 @@ import WebSocketClient from './components/WebSockerClient'
 function App() {
   const [selectedObject, setSelectedObject] = useState<MapObject | null>(null)
   const [mapLocation, setMapLocation] = useState<YMapLocationRequest | null>(null)
-  const [objects, setObjects] = useState<MapObject[]>(() => {
-    const stored = localStorage.getItem('mapObjects')
-    return stored ? JSON.parse(stored) : MAP_OBJECTS
-  })
-  const objectsRef = useRef<MapObject[]>(objects)
-
-  // Синхронизируем ref с текущими объектами
-  useEffect(() => {
-    objectsRef.current = objects
-  }, [objects])
-
-  // Сохранение объектов в localStorage при изменении
-  useEffect(() => {
-    localStorage.setItem('mapObjects', JSON.stringify(objects))
-  }, [objects])
+  const [objects, setObjects] = useState<MapObject[]>(MAP_OBJECTS)
+  const objectsRef = useRef<MapObject[]>(MAP_OBJECTS)
 
   // Функция для добавления нового объекта
   const addNewObject = useCallback(() => {
@@ -62,7 +49,7 @@ function App() {
       <EventFeed 
         selectedObject={selectedObject}
         onEventClick={handleEventClick}
-        objects={objects}
+        objects={objects} // Передаем объекты в EventFeed
       />
       <button 
         className="add-object-btn"
