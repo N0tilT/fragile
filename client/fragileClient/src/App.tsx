@@ -45,7 +45,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <WebSocketClient/>
+      <WebSocketClient objects={objects} setObjects={setObjects}/>
       <EventFeed 
         selectedObject={selectedObject}
         onEventClick={handleEventClick}

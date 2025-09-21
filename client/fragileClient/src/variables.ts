@@ -1,11 +1,17 @@
 import type {DrawingStyle, LngLat, PolygonGeometry, YMapLocationRequest} from '@yandex/ymaps3-types';
 import * as turf from '@turf/turf';
 
-export const Colors = [{
+export const Colors = {
     "DANGER":"ff0000",
     "UNSTABLE":"ffff00",
     "CALM":"00ff00"
-}]
+}
+
+export const BaseImages = {
+    "DANGER": "aliens.svg",
+    "UNSTABLE": "warning.svg",
+    "CALM": "device.svg"
+}
 
 export const LOCATION: YMapLocationRequest = {
     center: [37.623082, 55.75254],
