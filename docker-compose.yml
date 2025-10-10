@@ -272,7 +272,7 @@ services:
     container_name: fragile-client1
     environment:
       - APP_NAME=client1
-      - VITE_EMULATOR_URL=172.31.0.39:8081
+      - VITE_EMULATOR_URL=172.31.0.67:8082
       - REACT_APP_ADMIN_CLIENTS=fragile-client2
     build:
       context: ./client/fragileClient
@@ -297,7 +297,7 @@ services:
     container_name: fragile-client2
     environment:
       - APP_NAME=client2
-      - VITE_EMULATOR_URL=172.31.0.39:8082
+      - VITE_EMULATOR_URL=172.31.0.67:8081
       - REACT_APP_ADMIN_CLIENTS=fragile-client1
     build:
       context: ./client/fragileClient
@@ -323,8 +323,6 @@ services:
     container_name: fragile-client3
     environment:
       - APP_NAME=client3
-      - VITE_EMULATOR_URL=172.31.0.39:8082
-      - REACT_APP_ADMIN_CLIENTS=fragile-client1
     build:
       context: ./client/fragileAdmin
       dockerfile: Dockerfile

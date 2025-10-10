@@ -138,7 +138,7 @@ const WebSocketClient: React.FC<WebSockerClientProps> = ({ objects, setObjects }
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ maxWidth:"10%", padding: '20px' }}>
       <h1>Sensor Data Monitor</h1>
       <p>Status:
         <span style={{

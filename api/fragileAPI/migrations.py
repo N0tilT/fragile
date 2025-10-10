@@ -27,8 +27,9 @@ class MigrationManager:
                         status VARCHAR(32) NOT NULL,
                         coordinates VARCHAR(128) NOT NULL,
                         device_id SERIAL references devices(id),
-                        datetime TIMESTAMP WITH TIME ZONE NOT NULL
-                        )
+                        datetime TIMESTAMP WITH TIME ZONE NOT NULL,
+                        value DECIMAL(10,2) NOT NULL
+                )
             ''')
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS data(

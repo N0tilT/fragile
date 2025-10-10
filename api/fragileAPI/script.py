@@ -18,11 +18,11 @@ def replicate_database(config_source, config_target):
     target_datetime = result[0] if result else None
 
     if target_datetime is None:
-        cursor_source.execute("SELECT name, description, status, price, device_id, datetime FROM incidents")
+        cursor_source.execute("SELECT name, description, status,device_id, datetime,incidents,value FROM incidents")
         incidents = cursor_source.fetchall()
         for row in incidents:
             cursor_target.execute(
-                "INSERT INTO incidents (name, description, status, price, device_id, datetime) VALUES (%s, %s, %s, %s, %s, %s)",
+                "INSERT INTO incidents (name, description, status,device_id, datetime,incidents,value) VALUES (%s, %s, %s, %s, %s,%s,%s)",
                 row
             )
         
@@ -34,11 +34,11 @@ def replicate_database(config_source, config_target):
                 row
             )
     else:
-        cursor_source.execute("SELECT name, description, status, price, device_id, datetime FROM incidents WHERE datetime > %s", (target_datetime,))
+        cursor_source.execute("SELECT name, description, status, device_id, datetime,incidents,value FROM incidents WHERE datetime > %s", (target_datetime,))
         incidents = cursor_source.fetchall()
         for row in incidents:
             cursor_target.execute(
-                "INSERT INTO incidents (name, description, status, price, device_id, datetime) VALUES (%s, %s, %s, %s, %s, %s)",
+                "INSERT INTO incidents (name, description, status, device_id, datetime,incidents,value) VALUES (%s, %s, %s, %s, %s,%s,%s)",
                 row
             )
     

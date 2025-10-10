@@ -10,4 +10,5 @@ class Incident:
     status: str = ""
     coordinates: str = ""
     device_id: int = 0
-    datetime: datetime = None
+    datetime: datetime = None,
+    value: float = 0,

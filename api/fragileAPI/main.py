@@ -74,7 +74,14 @@ app = FastAPI(title="FragileAPI")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://fragile-client3:8137", "http://fragile-client3:5173"],
+    allow_origins=["http://localhost:8139",  
+    "http://fragile-client3:8137",
+    "http://fragile-client3:5173",
+    "http://172.31.0.39:8080",
+    "http://172.31.0.39:5173",
+    "http://172.31.0.39:8137",
+    "http://172.31.0.39:8138",
+    "http://172.31.0.39:8139","http://fragile-client3:8137","http://fragile-client3:5173", "http://172.31.0.39:8080", "http://172.31.0.39:5173","http://172.31.0.39:8137", "http://172.31.0.39:8138", "http://172.31.0.39:8139"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -177,11 +184,12 @@ async def create_incident(incident_data: dict):
             status=incident_data['status'],
             coordinates=incident_data['coordinates'],
             device_id=incident_data['device_id'],
-            datetime=datetime.now()
+            datetime=datetime.now(),
+            value=incident_data['value']
         )
-        created_incident = incident_repository.create_incident(incident)
-        logger.info(f"Incident created successfully: {created_incident.id}")
-        return created_incident
+        incident_repository.create_incident(incident)
+        logger.info(f"Incident created successfully")
+        return 1
     except Exception as e:
         logger.error(f"Error creating incident: {str(e)}", extra={'incident_data': incident_data})
         raise HTTPException(status_code=500, detail=f"Ошибка при добавлении инцидента: {str(e)}")
